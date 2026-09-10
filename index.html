@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My JARVIS</title>
+</head>
+
+<body>
+  <h1>🤖 MY JARVIS</h1>
+
+  <p id="reply">Hello! I am JARVIS.</p>
+
+  <button onclick="speak()">🔊 Talk to JARVIS</button>
+
+  <script>
+    function speak() {
+      const text = "Hello Prashanth. I am your JARVIS.";
+      document.getElementById("reply").innerText = text;
+
+      const voice = new SpeechSynthesisUtterance(text);
+      voice.lang = "en-US";
+      speechSynthesis.speak(voice);
+    }
+  </script>
+</body>
+</html>
