@@ -3,24 +3,83 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My JARVIS</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: #101820;
+      color: white;
+    }
+
+    h1 {
+      font-size: 40px;
+    }
+
+    #reply {
+      font-size: 22px;
+      margin: 30px 10px;
+    }
+
+    button {
+      font-size: 20px;
+      padding: 15px 25px;
+      border-radius: 12px;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>🤖 MY JARVIS</h1>
 
-  <p id="reply">Hello! I am JARVIS.</p>
+  <h1>🤖 JARVIS</h1>
 
-  <button onclick="speak()">🔊 Talk to JARVIS</button>
+  <p id="reply">Hello Prashanth. I am JARVIS.</p>
+
+  <button onclick="listen()">🎙️ Talk to JARVIS</button>
 
   <script>
-    function speak() {
-      const text = "Hello Prashanth. I am your JARVIS.";
-      document.getElementById("reply").innerText = text;
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
 
-      const voice = new SpeechSynthesisUtterance(text);
-      voice.lang = "en-US";
+    function listen() {
+
+      if (!SpeechRecognition) {
+        speak("Sorry Prashanth, voice recognition is not supported.");
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+
+      recognition.lang = "en-IN";
+      recognition.start();
+
+      document.getElementById("reply").innerText =
+        "🎙️ Listening...";
+
+      recognition.onresult = function(event) {
+
+        const command =
+          event.results[0][0].transcript;
+
+        document.getElementById("reply").innerText =
+          "You said: " + command;
+
+        speak("You said " + command);
+      };
+    }
+
+    function speak(text) {
+
+      const voice =
+        new SpeechSynthesisUtterance(text);
+
+      voice.lang = "en-IN";
+
       speechSynthesis.speak(voice);
     }
   </script>
+
 </body>
 </html>
