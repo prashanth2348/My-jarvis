@@ -62,6 +62,18 @@
 
         const command =
           event.results[0][0].transcript;
+        if (command.toLowerCase().startsWith("search")) {
+    const query = command.substring(6).trim();
+
+    if (query) {
+        speak("Searching Google for " + query);
+        window.open(
+            "https://www.google.com/search?q=" + encodeURIComponent(query),
+            "_blank"
+        );
+        return;
+    }
+        }
 
         document.getElementById("reply").innerText =
           "You said: " + command;
