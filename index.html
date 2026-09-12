@@ -20,12 +20,47 @@
     #reply {
       font-size: 22px;
       margin: 30px 10px;
+      min-height: 60px;
     }
 
     button {
       font-size: 20px;
       padding: 15px 25px;
       border-radius: 12px;
+      margin: 8px;
+      cursor: pointer;
+    }
+
+    #searchBox {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #searchBox input {
+      font-size: 18px;
+      padding: 12px;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    #searchBox button {
+      font-size: 18px;
+      padding: 12px 20px;
+    }
+
+    #results {
+      display: none;
+      margin-top: 25px;
+    }
+
+    #results iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 10px;
+      background: white;
     }
   </style>
 </head>
@@ -38,10 +73,24 @@
 
   <button onclick="listen()">🎙️ Talk to JARVIS</button>
 
+  <div id="searchBox">
+    <input id="searchInput" type="text" placeholder="Search Google...">
+    <br>
+    <button onclick="searchGoogle()">🔎 Search</button>
+    <button onclick="goBack()">⬅️ Back</button>
+  </div>
+
+  <div id="results">
+    <iframe id="googleFrame"></iframe>
+  </div>
+
   <script>
+
     const SpeechRecognition =
       window.SpeechRecognition ||
       window.webkitSpeechRecognition;
+
+    let recognition;
 
     function listen() {
 
@@ -50,39 +99,154 @@
         return;
       }
 
-      const recognition = new SpeechRecognition();
+      recognition = new SpeechRecognition();
 
       recognition.lang = "en-IN";
-      recognition.start();
+      recognition.continuous = false;
+      recognition.interimResults = false;
 
       document.getElementById("reply").innerText =
         "🎙️ Listening...";
 
+      recognition.start();
+
       recognition.onresult = function(event) {
 
         const command =
-          event.results[0][0].transcript;
-        if (command.toLowerCase().startsWith("search")) {
-    const query = command.substring(6).trim();
+          event.results[0][0].transcript.trim();
 
-    if (query) {
-        speak("Searching Google for " + query);
-        window.open(
-            "https://www.google.com/search?q=" + encodeURIComponent(query),
-            "_blank"
-        );
-        return;
-    }
-        }
+        handleCommand(command);
+      };
 
+      recognition.onerror = function() {
         document.getElementById("reply").innerText =
-          "You said: " + command;
-
-        speak("You said " + command);
+          "❌ I couldn't hear you. Try again.";
       };
     }
 
+
+    function handleCommand(command) {
+
+      const lowerCommand = command.toLowerCase();
+
+      document.getElementById("reply").innerText =
+        "You said: " + command;
+
+
+      // SEARCH COMMAND
+      if (lowerCommand.startsWith("search")) {
+
+        const query = command.substring(6).trim();
+
+        if (query) {
+          searchGoogleWithQuery(query);
+          return;
+        }
+
+        speak("What should I search?");
+        showSearchBox();
+        return;
+      }
+
+
+      // BACK COMMAND
+      if (
+        lowerCommand.includes("back") ||
+        lowerCommand.includes("venakki") ||
+        lowerCommand.includes("venaka")
+      ) {
+
+        goBack();
+        speak("Coming back to JARVIS.");
+        return;
+      }
+
+
+      // NEW SEARCH COMMAND
+      if (
+        lowerCommand.includes("another search") ||
+        lowerCommand.includes("another") ||
+        lowerCommand.includes("inko search") ||
+        lowerCommand.includes("next search")
+      ) {
+
+        showSearchBox();
+
+        speak("Okay Prashanth. What should I search?");
+        return;
+      }
+
+
+      // NORMAL COMMAND
+      speak("You said " + command);
+    }
+
+
+    function searchGoogleWithQuery(query) {
+
+      document.getElementById("searchInput").value = query;
+
+      document.getElementById("reply").innerText =
+        "🔎 Searching Google for: " + query;
+
+      speak("Searching Google for " + query);
+
+      /*
+        Google may block iframe loading.
+        So we open Google in the same tab.
+      */
+
+      window.location.href =
+        "https://www.google.com/search?q=" +
+        encodeURIComponent(query);
+    }
+
+
+    function searchGoogle() {
+
+      const query =
+        document.getElementById("searchInput").value.trim();
+
+      if (!query) {
+        speak("Please enter something to search.");
+        return;
+      }
+
+      searchGoogleWithQuery(query);
+    }
+
+
+    function showSearchBox() {
+
+      document.getElementById("searchBox").style.display =
+        "block";
+
+      document.getElementById("results").style.display =
+        "none";
+
+      document.getElementById("searchInput").focus();
+    }
+
+
+    function goBack() {
+
+      /*
+        Browser back button.
+        This returns to the previous JARVIS page.
+      */
+
+      if (document.referrer) {
+        history.back();
+      } else {
+        window.location.href =
+          "https://prashanth2348.github.io/My-jarvis/";
+      }
+    }
+
+
     function speak(text) {
+
+      speechSynthesis.cancel();
 
       const voice =
         new SpeechSynthesisUtterance(text);
@@ -91,6 +255,7 @@
 
       speechSynthesis.speak(voice);
     }
+
   </script>
 
 </body>
