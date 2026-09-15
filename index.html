@@ -49,19 +49,6 @@
       font-size: 18px;
       padding: 12px 20px;
     }
-
-    #results {
-      display: none;
-      margin-top: 25px;
-    }
-
-    #results iframe {
-      width: 100%;
-      height: 500px;
-      border: none;
-      border-radius: 10px;
-      background: white;
-    }
   </style>
 </head>
 
@@ -80,10 +67,6 @@
     <button onclick="goBack()">⬅️ Back</button>
   </div>
 
-  <div id="results">
-    <iframe id="googleFrame"></iframe>
-  </div>
-
   <script>
 
     const SpeechRecognition =
@@ -92,6 +75,7 @@
 
     let recognition;
 
+    // 🎙️ VOICE LISTEN
     function listen() {
 
       if (!SpeechRecognition) {
@@ -125,6 +109,7 @@
     }
 
 
+    // 🧠 COMMAND HANDLER
     function handleCommand(command) {
 
       const lowerCommand = command.toLowerCase();
@@ -133,7 +118,7 @@
         "You said: " + command;
 
 
-      // SEARCH COMMAND
+      // 🔎 SEARCH
       if (lowerCommand.startsWith("search")) {
 
         const query = command.substring(6).trim();
@@ -149,20 +134,21 @@
       }
 
 
-      // BACK COMMAND
+      // ⬅️ BACK
       if (
-        lowerCommand.includes("back") ||
-        lowerCommand.includes("venakki") ||
-        lowerCommand.includes("venaka")
+        lowerCommand === "back" ||
+        lowerCommand === "go back" ||
+        lowerCommand === "venakki" ||
+        lowerCommand === "venaka" ||
+        lowerCommand.includes("go back")
       ) {
 
         goBack();
-        speak("Coming back to JARVIS.");
         return;
       }
 
 
-      // NEW SEARCH COMMAND
+      // 🔎 ANOTHER SEARCH
       if (
         lowerCommand.includes("another search") ||
         lowerCommand.includes("another") ||
@@ -177,11 +163,41 @@
       }
 
 
-      // NORMAL COMMAND
+      // 👋 HELLO
+      if (
+        lowerCommand.includes("hello") ||
+        lowerCommand.includes("hi")
+      ) {
+
+        speak("Hello Prashanth. How can I help you?");
+        return;
+      }
+
+
+      // 🕐 TIME
+      if (lowerCommand.includes("time")) {
+
+        const now = new Date();
+
+        const time = now.toLocaleTimeString(
+          "en-IN",
+          {
+            hour: "numeric",
+            minute: "2-digit"
+          }
+        );
+
+        speak("The time is " + time);
+        return;
+      }
+
+
+      // 🤖 NORMAL COMMAND
       speak("You said " + command);
     }
 
 
+    // 🔎 SEARCH WITH VOICE
     function searchGoogleWithQuery(query) {
 
       document.getElementById("searchInput").value = query;
@@ -191,17 +207,17 @@
 
       speak("Searching Google for " + query);
 
-      /*
-        Google may block iframe loading.
-        So we open Google in the same tab.
-      */
+      setTimeout(function() {
 
-      window.location.href =
-        "https://www.google.com/search?q=" +
-        encodeURIComponent(query);
+        window.location.href =
+          "https://www.google.com/search?q=" +
+          encodeURIComponent(query);
+
+      }, 700);
     }
 
 
+    // 🔎 SEARCH BUTTON
     function searchGoogle() {
 
       const query =
@@ -216,44 +232,48 @@
     }
 
 
+    // 📦 SHOW SEARCH BOX
     function showSearchBox() {
 
       document.getElementById("searchBox").style.display =
         "block";
 
-      document.getElementById("results").style.display =
-        "none";
-
       document.getElementById("searchInput").focus();
     }
 
 
+    // ⬅️ BACK FUNCTION
     function goBack() {
 
-      /*
-        Browser back button.
-        This returns to the previous JARVIS page.
-      */
+      document.getElementById("reply").innerText =
+        "⬅️ Going back...";
 
-      if (document.referrer) {
-        history.back();
-      } else {
-        window.location.href =
-          "https://prashanth2348.github.io/My-jarvis/";
-      }
+      speak("Going back to JARVIS.");
+
+      setTimeout(function() {
+
+        window.history.back();
+
+      }, 500);
     }
 
 
+    // 🔊 TEXT TO SPEECH
     function speak(text) {
 
-      speechSynthesis.cancel();
+      if ("speechSynthesis" in window) {
 
-      const voice =
-        new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.cancel();
 
-      voice.lang = "en-IN";
+        const message =
+          new SpeechSynthesisUtterance(text);
 
-      speechSynthesis.speak(voice);
+        message.lang = "en-IN";
+        message.rate = 1;
+        message.pitch = 1;
+
+        window.speechSynthesis.speak(message);
+      }
     }
 
   </script>
